@@ -1,8 +1,8 @@
 package HashMap;
 
-public class MyHashMap<T> {
+public class MyHashMap<K, T> {
 
-    private Node<T>[] table;
+    private Node<K, T>[] table;
     private int size;
     private static final int DEFAULT_SIZE = 16;
     private static final double LOAD_FACTOR = 0.75;
@@ -16,16 +16,20 @@ public class MyHashMap<T> {
         return Math.abs(key.hashCode() % table.length);
     }
 
-    public void put(Object key, T value) {
+    private int getIndex(Object key) {
+        return hashFunction(key);
+    }
+
+    public void put(K key, T value) {
         if ((double) size / table.length > LOAD_FACTOR) {
             resizeTable();
         }
 
-        int index = hashFunction(key);
-        Node<T> newNode = new Node<>(key, value);
+        int index = getIndex(key);
+        Node<K, T> newNode = new Node<>(key, value);
 
         if (table[index] != null) {
-            Node<T> current = table[index];
+            Node<K, T> current = table[index];
             while (current != null) {
                 if (current.key.equals(key)) {
                     current.value = value;
@@ -39,10 +43,10 @@ public class MyHashMap<T> {
         size++;
     }
 
-    public void remove(Object key) {
-        int index = hashFunction(key);
-        Node<T> current = table[index];
-        Node<T> previous = null;
+    public void remove(K key) {
+        int index = getIndex(key);
+        Node<K, T> current = table[index];
+        Node<K, T> previous = null;
 
         while (current != null) {
             if (current.key.equals(key)) {
@@ -68,9 +72,9 @@ public class MyHashMap<T> {
         return size;
     }
 
-    public T get(Object key) {
-        int index = hashFunction(key);
-        Node<T> current = table[index];
+    public T get(K key) {
+        int index = getIndex(key);
+        Node<K, T> current = table[index];
 
         while (current != null) {
             if (current.key.equals(key)) {
@@ -83,12 +87,12 @@ public class MyHashMap<T> {
 
     private void resizeTable() {
         int newCapacity = table.length * 2;
-        Node<T>[] newTable = new Node[newCapacity];
+        Node<K, T>[] newTable = new Node[newCapacity];
 
-        for (Node<T> node : table) {
+        for (Node<K, T> node : table) {
             while (node != null) {
-                int newIndex = hashFunction(node.key);
-                Node<T> newNode = new Node<>(node.key, node.value);
+                int newIndex = getIndex(node.key);
+                Node<K, T> newNode = new Node<>(node.key, node.value);
                 newNode.next = newTable[newIndex];
                 newTable[newIndex] = newNode;
                 node = node.next;
@@ -98,12 +102,12 @@ public class MyHashMap<T> {
         table = newTable;
     }
 
-    private static class Node<T> {
-        private final Object key;
+    private static class Node<K, T> {
+        private final K key;
         private T value;
-        private Node<T> next;
+        private Node<K, T> next;
 
-        public Node(Object key, T value) {
+        public Node(K key, T value) {
             this.key = key;
             this.value = value;
             this.next = null;
